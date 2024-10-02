@@ -18,45 +18,63 @@ namespace BPMS.API.Controllers
 
         // GET: api/BlogPosts/getposts
         [HttpGet("getposts")]
-        public async Task<ActionResult<IEnumerable<BlogPostDTO>>> GetBlogPosts()
+        public async Task<IActionResult> GetBlogPosts()
         {
-            var posts = await _blogPostService.GetAllAsync();
-            return Ok(posts);
+            var result = await _blogPostService.GetAllAsync();
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
         }
 
         // GET: api/BlogPosts/getbyid/{id}
         [HttpGet("getbyid/{id}")]
-        public async Task<ActionResult<BlogPostDTO>> GetBlogPost(string id)
+        public async Task<IActionResult> GetBlogPost(string id)
         {
-            var post = await _blogPostService.GetByIdAsync(id.FromSqid());
+            var result = await _blogPostService.GetByIdAsync(id.FromSqid());
 
-            if (post == null)
+            if (!result.Succeeded)
             {
-                return NotFound();
+                return NotFound(result.Message);
             }
 
-            return Ok(post);
+            return Ok(result);
         }
 
         // POST: api/BlogPosts/addpost
         [HttpPost("addpost")]
         public async Task<IActionResult> PostBlogPost(BlogPostDTO blogPostDto)
         {
-            await _blogPostService.AddAsync(blogPostDto);
-            return Ok(blogPostDto);
+            var result = await _blogPostService.AddAsync(blogPostDto);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
         }
 
         // GET: api/BlogPosts/search?title=sample&author=john
-        [HttpGet("searchByTitleOrAuthor")]
-        public async Task<ActionResult<IEnumerable<BlogPostDTO>>> Search(string title, string author)
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(string? title, string? author)
         {
             if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author))
             {
                 return BadRequest("At least one search parameter (title or author) must be provided.");
             }
 
-            var posts = await _blogPostService.SearchAsync(title, author);
-            return Ok(posts);
+            var result = await _blogPostService.SearchAsync(title, author);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result);
         }
     }
 }

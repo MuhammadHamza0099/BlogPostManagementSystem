@@ -3,6 +3,7 @@ using BPMS.API.Data;
 using BPMS.API.Data.DTOs;
 using BPMS.API.Data.Entities;
 using BPMS.API.Interfaces;
+using BPMS.Result;
 using Microsoft.EntityFrameworkCore;
 
 namespace BPMS.API.Services
@@ -18,26 +19,35 @@ namespace BPMS.API.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BlogPostDTO>> GetAllAsync()
+        public async Task<Result<IEnumerable<BlogPostDTO>>> GetAllAsync()
         {
             var blogPosts = await _context.BlogPosts.ToListAsync();
-            return _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+            var blogPostDTOs = _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+            return Result<IEnumerable<BlogPostDTO>>.Success(blogPostDTOs);
         }
 
-        public async Task<BlogPostDTO> GetByIdAsync(int id)
+        public async Task<Result<BlogPostDTO>> GetByIdAsync(int id)
         {
             var blogPost = await _context.BlogPosts.FindAsync(id);
-            return _mapper.Map<BlogPostDTO>(blogPost);
+            if (blogPost == null)
+            {
+                return Result<BlogPostDTO>.Fail("Blog post not found");
+            }
+
+            var blogPostDTO = _mapper.Map<BlogPostDTO>(blogPost);
+            return Result<BlogPostDTO>.Success(blogPostDTO);
         }
 
-        public async Task AddAsync(BlogPostDTO blogPostDto)
+        public async Task<Result<BlogPostDTO>> AddAsync(BlogPostDTO blogPostDto)
         {
             var blogPost = _mapper.Map<BlogPost>(blogPostDto);
             _context.BlogPosts.Add(blogPost);
             await _context.SaveChangesAsync();
+
+            return Result<BlogPostDTO>.Success(blogPostDto, "Blog post created successfully");
         }
 
-        public async Task<IEnumerable<BlogPostDTO>> SearchAsync(string title, string author)
+        public async Task<Result<IEnumerable<BlogPostDTO>>> SearchAsync(string title, string author)
         {
             var query = _context.BlogPosts.AsQueryable();
 
@@ -52,8 +62,9 @@ namespace BPMS.API.Services
             }
 
             var blogPosts = await query.ToListAsync();
-            return _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+            var blogPostDTOs = _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+
+            return Result<IEnumerable<BlogPostDTO>>.Success(blogPostDTOs);
         }
     }
-
 }

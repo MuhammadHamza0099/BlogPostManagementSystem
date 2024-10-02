@@ -1,12 +1,13 @@
 ﻿using BPMS.API.Data.DTOs;
+using BPMS.Result;
 
 namespace BPMS.API.Interfaces
 {
     public interface IBlogPostService
     {
-        Task<IEnumerable<BlogPostDTO>> GetAllAsync();
-        Task<BlogPostDTO> GetByIdAsync(int id);
-        Task AddAsync(BlogPostDTO blogPost);
-        Task<IEnumerable<BlogPostDTO>> SearchAsync(string title, string author);
+        Task<Result<IEnumerable<BlogPostDTO>>> GetAllAsync();
+        Task<Result<BlogPostDTO>> GetByIdAsync(int id);
+        Task<Result<BlogPostDTO>> AddAsync(BlogPostDTO blogPost);
+        Task<Result<IEnumerable<BlogPostDTO>>> SearchAsync(string title, string author);
     }
 }
