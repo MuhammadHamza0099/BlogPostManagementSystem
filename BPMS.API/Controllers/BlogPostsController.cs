@@ -1,4 +1,5 @@
 ﻿using BPMS.API.Data.Entities;
+using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,9 +26,9 @@ namespace BPMS.API.Controllers
 
         // GET: api/BlogPosts/getbyid/{id}
         [HttpGet("getbyid/{id}")]
-        public async Task<ActionResult<BlogPost>> GetBlogPost(int id)
+        public async Task<ActionResult<BlogPost>> GetBlogPost(string id)
         {
-            var post = await _blogPostService.GetByIdAsync(id);
+            var post = await _blogPostService.GetByIdAsync(id.FromSqid());
 
             if (post == null)
             {
@@ -39,11 +40,12 @@ namespace BPMS.API.Controllers
 
         // POST: api/BlogPosts/addpost
         [HttpPost("addpost")]
-        public async Task<ActionResult<BlogPost>> PostBlogPost(BlogPost blogPost)
+        public async Task<IActionResult> PostBlogPost(BlogPost blogPost)
         {
             await _blogPostService.AddAsync(blogPost);
-            return CreatedAtAction(nameof(GetBlogPost), new { id = blogPost.Id }, blogPost);
+            return Ok(blogPost); // Return the created blog post with OK status
         }
+
 
         // GET: api/BlogPosts/search?title=sample&author=john
         [HttpGet("search")]
