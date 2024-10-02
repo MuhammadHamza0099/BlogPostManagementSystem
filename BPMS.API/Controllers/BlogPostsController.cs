@@ -1,4 +1,4 @@
-﻿using BPMS.API.Data.Entities;
+﻿using BPMS.API.Data.DTOs;
 using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +18,7 @@ namespace BPMS.API.Controllers
 
         // GET: api/BlogPosts/getposts
         [HttpGet("getposts")]
-        public async Task<ActionResult<IEnumerable<BlogPost>>> GetBlogPosts()
+        public async Task<ActionResult<IEnumerable<BlogPostDTO>>> GetBlogPosts()
         {
             var posts = await _blogPostService.GetAllAsync();
             return Ok(posts);
@@ -26,7 +26,7 @@ namespace BPMS.API.Controllers
 
         // GET: api/BlogPosts/getbyid/{id}
         [HttpGet("getbyid/{id}")]
-        public async Task<ActionResult<BlogPost>> GetBlogPost(string id)
+        public async Task<ActionResult<BlogPostDTO>> GetBlogPost(string id)
         {
             var post = await _blogPostService.GetByIdAsync(id.FromSqid());
 
@@ -40,16 +40,15 @@ namespace BPMS.API.Controllers
 
         // POST: api/BlogPosts/addpost
         [HttpPost("addpost")]
-        public async Task<IActionResult> PostBlogPost(BlogPost blogPost)
+        public async Task<IActionResult> PostBlogPost(BlogPostDTO blogPostDto)
         {
-            await _blogPostService.AddAsync(blogPost);
-            return Ok(blogPost); // Return the created blog post with OK status
+            await _blogPostService.AddAsync(blogPostDto);
+            return Ok(blogPostDto);
         }
 
-
         // GET: api/BlogPosts/search?title=sample&author=john
-        [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<BlogPost>>> Search(string? title, string? author)
+        [HttpGet("searchByTitleOrAuthor")]
+        public async Task<ActionResult<IEnumerable<BlogPostDTO>>> Search(string title, string author)
         {
             if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author))
             {

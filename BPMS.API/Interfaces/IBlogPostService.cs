@@ -1,12 +1,12 @@
-﻿using BPMS.API.Data.Entities;
+﻿using BPMS.API.Data.DTOs;
 
 namespace BPMS.API.Interfaces
 {
     public interface IBlogPostService
     {
-        Task<IEnumerable<BlogPost>> GetAllAsync();
-        Task<BlogPost> GetByIdAsync(int id);
-        Task AddAsync(BlogPost blogPost);
-        Task<IEnumerable<BlogPost>> SearchAsync(string title, string author);
+        Task<IEnumerable<BlogPostDTO>> GetAllAsync();
+        Task<BlogPostDTO> GetByIdAsync(int id);
+        Task AddAsync(BlogPostDTO blogPost);
+        Task<IEnumerable<BlogPostDTO>> SearchAsync(string title, string author);
     }
 }

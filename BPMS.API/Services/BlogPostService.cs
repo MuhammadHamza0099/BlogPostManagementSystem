@@ -1,4 +1,6 @@
-﻿using BPMS.API.Data;
+﻿using AutoMapper;
+using BPMS.API.Data;
+using BPMS.API.Data.DTOs;
 using BPMS.API.Data.Entities;
 using BPMS.API.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -8,37 +10,34 @@ namespace BPMS.API.Services
     public class BlogPostService : IBlogPostService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public BlogPostService(ApplicationDbContext context)
+        public BlogPostService(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BlogPost>> GetAllAsync()
+        public async Task<IEnumerable<BlogPostDTO>> GetAllAsync()
         {
-            return await _context.BlogPosts
-                .Select(b => new BlogPost
-                {
-                    Id = b.Id,
-                    Title = b.Title,
-                    Author = b.Author,
-                    Qoute = b.Qoute
-                })
-                .ToListAsync();
+            var blogPosts = await _context.BlogPosts.ToListAsync();
+            return _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
         }
 
-        public async Task<BlogPost> GetByIdAsync(int id)
+        public async Task<BlogPostDTO> GetByIdAsync(int id)
         {
-            return await _context.BlogPosts.FindAsync(id);
+            var blogPost = await _context.BlogPosts.FindAsync(id);
+            return _mapper.Map<BlogPostDTO>(blogPost);
         }
 
-        public async Task AddAsync(BlogPost blogPost)
+        public async Task AddAsync(BlogPostDTO blogPostDto)
         {
+            var blogPost = _mapper.Map<BlogPost>(blogPostDto);
             _context.BlogPosts.Add(blogPost);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<BlogPost>> SearchAsync(string title, string author)
+        public async Task<IEnumerable<BlogPostDTO>> SearchAsync(string title, string author)
         {
             var query = _context.BlogPosts.AsQueryable();
 
@@ -52,7 +51,9 @@ namespace BPMS.API.Services
                 query = query.Where(b => b.Author.Contains(author));
             }
 
-            return await query.ToListAsync();
+            var blogPosts = await query.ToListAsync();
+            return _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
         }
     }
+
 }
