@@ -10,20 +10,24 @@ namespace BPMS.API.Controllers
     public class BlogPostsController : ControllerBase
     {
         private readonly IBlogPostService _blogPostService;
+        private readonly ILogger<BlogPostsController> _logger;
 
-        public BlogPostsController(IBlogPostService blogPostService)
+        public BlogPostsController(IBlogPostService blogPostService, ILogger<BlogPostsController> logger)
         {
             _blogPostService = blogPostService;
+            _logger = logger;
         }
 
         // GET: api/BlogPosts/getposts
         [HttpGet("getposts")]
         public async Task<IActionResult> GetBlogPosts()
         {
+            _logger.LogInformation("Getting all blog posts.");
             var result = await _blogPostService.GetAllAsync();
 
             if (!result.Succeeded)
             {
+                _logger.LogWarning("Failed to retrieve blog posts.");
                 return BadRequest(result.Message);
             }
 

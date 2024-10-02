@@ -1,5 +1,6 @@
 using BPMS.API.Data;
 using BPMS.API.Data.Models;
+using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using BPMS.API.Middlewares;
 using BPMS.API.Services;
@@ -11,11 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration) // Read from appsettings.json
+    .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .CreateLogger();
 
-// Set Serilog as the default logging provider
+
 builder.Host.UseSerilog();
 
 // Load Sqids settings
@@ -49,7 +50,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseSqids();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
