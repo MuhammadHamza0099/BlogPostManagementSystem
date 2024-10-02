@@ -1,6 +1,7 @@
 ﻿using BPMS.API.Data.DTOs;
 using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
+using BPMS.Result;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BPMS.API.Controllers
@@ -46,10 +47,18 @@ namespace BPMS.API.Controllers
 
         // POST: api/BlogPosts/addpost
         [HttpPost("addpost")]
-        public async Task<IActionResult> PostBlogPost(BlogPostDTO blogPostDto)
+        public async Task<IActionResult> PostBlogPost([FromBody] BlogPostDTO blogPostDto)
         {
-            var result = await _blogPostService.AddAsync(blogPostDto);
+            if (!ModelState.IsValid)
+            {
+                // Return the validation errors to the client
+                return BadRequest(Result<BlogPostDTO>.Fail(
+                    "Validation failed",
+                    ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()
+                ));
+            }
 
+            var result = await _blogPostService.AddAsync(blogPostDto);
             if (!result.Succeeded)
             {
                 return BadRequest(result.Message);
@@ -59,8 +68,8 @@ namespace BPMS.API.Controllers
         }
 
         // GET: api/BlogPosts/search?title=sample&author=john
-        [HttpGet("search")]
-        public async Task<IActionResult> Search(string? title, string? author)
+        [HttpGet("searchByTitleOrAuthor")]
+        public async Task<IActionResult> Search(string title, string author)
         {
             if (string.IsNullOrWhiteSpace(title) && string.IsNullOrWhiteSpace(author))
             {
