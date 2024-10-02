@@ -2,6 +2,8 @@
 using BPMS.API.Data;
 using BPMS.API.Data.DTOs;
 using BPMS.API.Data.Entities;
+using BPMS.API.Exceptions;
+using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using BPMS.Result;
 using Microsoft.EntityFrameworkCore;
@@ -26,12 +28,12 @@ namespace BPMS.API.Services
             return Result<IEnumerable<BlogPostDTO>>.Success(blogPostDTOs);
         }
 
-        public async Task<Result<BlogPostDTO>> GetByIdAsync(int id)
+        public async Task<Result<BlogPostDTO>> GetByIdAsync(string id)
         {
-            var blogPost = await _context.BlogPosts.FindAsync(id);
+            var blogPost = await _context.BlogPosts.FindAsync(id.FromSqid());
             if (blogPost == null)
             {
-                return Result<BlogPostDTO>.Fail("Blog post not found");
+                throw new NotFoundException("Blog post not found");
             }
 
             var blogPostDTO = _mapper.Map<BlogPostDTO>(blogPost);
@@ -40,6 +42,12 @@ namespace BPMS.API.Services
 
         public async Task<Result<BlogPostDTO>> AddAsync(BlogPostDTO blogPostDto)
         {
+            // Perform input validation, throw exceptions as needed
+            if (string.IsNullOrWhiteSpace(blogPostDto.Title) || string.IsNullOrWhiteSpace(blogPostDto.Author))
+            {
+                throw new BadRequestException("Title and Author cannot be empty.");
+            }
+
             var blogPost = _mapper.Map<BlogPost>(blogPostDto);
             _context.BlogPosts.Add(blogPost);
             await _context.SaveChangesAsync();

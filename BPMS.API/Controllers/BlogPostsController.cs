@@ -1,5 +1,4 @@
 ﻿using BPMS.API.Data.DTOs;
-using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using BPMS.Result;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +34,7 @@ namespace BPMS.API.Controllers
         [HttpGet("getbyid/{id}")]
         public async Task<IActionResult> GetBlogPost(string id)
         {
-            var result = await _blogPostService.GetByIdAsync(id.FromSqid());
+            var result = await _blogPostService.GetByIdAsync(id);
 
             if (!result.Succeeded)
             {

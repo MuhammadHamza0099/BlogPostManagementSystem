@@ -2,6 +2,7 @@ using BPMS.API.Data;
 using BPMS.API.Data.Models;
 using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
+using BPMS.API.Middlewares;
 using BPMS.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Sqids;
@@ -42,6 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseSqids();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
