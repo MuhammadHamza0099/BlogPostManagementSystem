@@ -38,11 +38,12 @@ namespace BPMS.API.Controllers
 
             if (!result.Succeeded)
             {
-                return NotFound(result.Message);
+                return NotFound(Result<BlogPostDTO>.Fail(result.Message));
             }
 
             return Ok(result);
         }
+
 
         // POST: api/BlogPosts/addpost
         [HttpPost("addpost")]

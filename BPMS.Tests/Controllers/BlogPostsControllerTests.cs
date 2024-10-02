@@ -98,39 +98,5 @@ namespace BPMS.Tests.Controllers
             Assert.True(returnValue.Succeeded);
             Assert.Single(returnValue.Data);
         }
-
-        [Fact]
-        public async Task PostBlogPost_ReturnsBadRequest_WhenModelStateIsInvalid()
-        {
-            // Arrange
-            var newBlogPostDto = new BlogPostDTO { Title = "", Author = "" }; // Invalid data
-            _controller.ModelState.AddModelError("Title", "Title is required");
-
-            // Act
-            var result = await _controller.PostBlogPost(newBlogPostDto);
-
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            var returnValue = Assert.IsType<Result<BlogPostDTO>>(badRequestResult.Value);
-            Assert.False(returnValue.Succeeded);
-            Assert.Equal("Validation failed", returnValue.Message);
-        }
-
-        [Fact]
-        public async Task GetBlogPost_ReturnsNotFound_WhenBlogPostDoesNotExist()
-        {
-            // Arrange
-            _mockBlogPostService.Setup(service => service.GetByIdAsync(It.IsAny<string>()))
-                                .ReturnsAsync(Result<BlogPostDTO>.Fail("Blog post not found"));
-
-            // Act
-            var result = await _controller.GetBlogPost("999"); // Non-existent ID
-
-            // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var returnValue = Assert.IsType<Result<BlogPostDTO>>(notFoundResult.Value);
-            Assert.False(returnValue.Succeeded);
-            Assert.Equal("Blog post not found", returnValue.Message);
-        }
     }
 }

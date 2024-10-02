@@ -1,18 +1,26 @@
 using BPMS.API.Data;
 using BPMS.API.Data.Models;
-using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using BPMS.API.Middlewares;
 using BPMS.API.Services;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Sqids;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration) // Read from appsettings.json
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
+// Set Serilog as the default logging provider
+builder.Host.UseSerilog();
 
-var sqidssSettingsSection = builder.Configuration.GetSection(nameof(SqidsSettings));
-var sqidsSettings = sqidssSettingsSection.Get<SqidsSettings>();
+// Load Sqids settings
+var sqidsSettingsSection = builder.Configuration.GetSection(nameof(SqidsSettings));
+var sqidsSettings = sqidsSettingsSection.Get<SqidsSettings>();
 
 // Register Sqids with the loaded settings
 builder.Services.AddSingleton(new SqidsEncoder<int>(new SqidsOptions
@@ -21,8 +29,6 @@ builder.Services.AddSingleton(new SqidsEncoder<int>(new SqidsOptions
     Alphabet = sqidsSettings.Alphabet
 }));
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -30,7 +36,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
 
 builder.Services.AddScoped<IBlogPostService, BlogPostService>();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -44,12 +49,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseSqids();
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
+app.UseSerilogRequestLogging();
 app.MapControllers();
 
 app.Run();
