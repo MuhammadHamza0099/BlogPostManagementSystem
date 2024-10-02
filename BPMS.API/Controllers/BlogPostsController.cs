@@ -48,7 +48,6 @@ namespace BPMS.API.Controllers
             return Ok(result);
         }
 
-
         // POST: api/BlogPosts/addpost
         [HttpPost("addpost")]
         public async Task<IActionResult> PostBlogPost([FromBody] BlogPostDTO blogPostDto)
