@@ -1,6 +1,10 @@
 ﻿# Blog Post Management System
 Blog Post Management System related repositories.
 
+# DataBase connection string setting
+# Set server, Database name, user and password.
+# Run Update Database command in Package manager console.
+
 ## ADD MIGRATION
 ### Starup Project: BPMS.API
 ### Default Project: BPMS.API
