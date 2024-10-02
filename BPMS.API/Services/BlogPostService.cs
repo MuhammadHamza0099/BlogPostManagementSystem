@@ -56,18 +56,22 @@ namespace BPMS.API.Services
 
         public async Task<Result<BlogPostDTO>> AddAsync(BlogPostDTO blogPostDto)
         {
-            // Perform input validation, throw exceptions as needed
-            if (string.IsNullOrWhiteSpace(blogPostDto.Title) || string.IsNullOrWhiteSpace(blogPostDto.Author))
-            {
-                throw new BadRequestException("Title and Author cannot be empty.");
-            }
-
             var blogPost = _mapper.Map<BlogPost>(blogPostDto);
             _context.BlogPosts.Add(blogPost);
             await _context.SaveChangesAsync();
 
+            var blogPosts = await _context.BlogPosts.ToListAsync();
+            var blogPostDTOs = _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+
+            // Update the cache
+            const string cacheKey = "blogPostsCache";
+            var cacheOptions = new MemoryCacheEntryOptions()
+                .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+            _cache.Set(cacheKey, blogPostDTOs, cacheOptions);
+
             return Result<BlogPostDTO>.Success(blogPostDto, "Blog post created successfully");
         }
+
 
         public async Task<Result<IEnumerable<BlogPostDTO>>> SearchAsync(string title, string author)
         {
