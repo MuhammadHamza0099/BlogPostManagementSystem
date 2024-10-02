@@ -7,6 +7,7 @@ using BPMS.API.Extensions;
 using BPMS.API.Interfaces;
 using BPMS.Result;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BPMS.API.Services
 {
@@ -14,17 +15,30 @@ namespace BPMS.API.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _cache;
 
-        public BlogPostService(ApplicationDbContext context, IMapper mapper)
+        public BlogPostService(ApplicationDbContext context, IMapper mapper, IMemoryCache cache)
         {
             _context = context;
             _mapper = mapper;
+            _cache = cache;
         }
 
         public async Task<Result<IEnumerable<BlogPostDTO>>> GetAllAsync()
         {
-            var blogPosts = await _context.BlogPosts.ToListAsync();
-            var blogPostDTOs = _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+            const string cacheKey = "blogPostsCache";
+
+            if (!_cache.TryGetValue(cacheKey, out IEnumerable<BlogPostDTO> blogPostDTOs))
+            {
+                var blogPosts = await _context.BlogPosts.ToListAsync();
+                blogPostDTOs = _mapper.Map<IEnumerable<BlogPostDTO>>(blogPosts);
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _cache.Set(cacheKey, blogPostDTOs, cacheOptions);
+            }
+
             return Result<IEnumerable<BlogPostDTO>>.Success(blogPostDTOs);
         }
 
