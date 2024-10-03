@@ -3,6 +3,7 @@ using BPMS.API.Data.DTOs;
 using BPMS.API.Interfaces;
 using BPMS.Result;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace BPMS.Tests.Controllers
@@ -10,12 +11,14 @@ namespace BPMS.Tests.Controllers
     public class BlogPostsControllerTests
     {
         private readonly Mock<IBlogPostService> _mockBlogPostService;
+        private readonly Mock<ILogger<BlogPostsController>> _mockLogger;
         private readonly BlogPostsController _controller;
 
         public BlogPostsControllerTests()
         {
             _mockBlogPostService = new Mock<IBlogPostService>();
-            _controller = new BlogPostsController(_mockBlogPostService.Object);
+            _mockLogger = new Mock<ILogger<BlogPostsController>>();
+            _controller = new BlogPostsController(_mockBlogPostService.Object, _mockLogger.Object);
         }
 
         [Fact]
